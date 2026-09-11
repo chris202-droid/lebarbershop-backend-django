@@ -4,7 +4,8 @@ Configuration Django pour LEBARBERSHOP.
 from pathlib import Path
 from datetime import timedelta
 import os
-from urllib.parse import urlparse
+import sys
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -83,24 +84,23 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # 2. Découpage manuel de l'URL avec les outils natifs de Python
-db_url = os.environ.get('POSTGRES_URL')
+#db_url = os.environ.get('POSTGRES_URL')
+db_url = os.environ.get("POSTGRES_URL") or os.environ.get("DATABASE_URL")
+
 if db_url:
-    url = urlparse(db_url)
     DATABASES = {
-        'default': {
-                'ENGINE': 'django.contrib.gis.db.backends.postgis',
-                'NAME': url.path[1:],
-                'USER': url.username,
-                'PASSWORD':  url.password,
-                'HOST': url.hostname,
-                'PORT': url.port or 543,
-                'OPTIONS':{
-                    'charset':'utf8',
-                    'init_command':"SET sql_mode = 'STRICT_TRANS_TABLES' ",
-                    'sslmode':'require'
-                },
-            }
+        "default": dj_database_url.config(
+            default=db_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
+    # PostGIS (géolocalisation) : on force l'engine SIG.
+    DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+    # Options spécifiques PostgreSQL (sslmode déjà géré par dj-database-url
+    # via ssl_require=True, on n'ajoute rien d'autre ici — surtout pas
+    # 'charset' ni 'init_command' qui sont des options MySQL).
 else:
     DATABASES = {
     'default': {
