@@ -4,6 +4,7 @@ Configuration Django pour LEBARBERSHOP.
 from pathlib import Path
 from datetime import timedelta
 import os
+from urllib import urlparse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
