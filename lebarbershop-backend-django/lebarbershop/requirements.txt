@@ -7,4 +7,4 @@ psycopg2-binary==2.9.9
 gunicorn==22.0.0
 python-decouple==3.8
 Pillow==10.3.0
-urllib
+dj_database_url
